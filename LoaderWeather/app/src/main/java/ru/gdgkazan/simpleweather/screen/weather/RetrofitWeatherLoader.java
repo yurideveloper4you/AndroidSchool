@@ -26,17 +26,27 @@ public class RetrofitWeatherLoader extends Loader<City> {
         mCall = ApiFactory.getWeatherService().getWeather(cityName);
     }
 
-    @Override
+   @Override
     protected void onStartLoading() {
+        //        мы проверяем, завершился ли запрос (доступны ли сохраненные данные). Если
+        //        данные есть, то мы сразу возвращаем их, иначе начинаем загружать все заново
         super.onStartLoading();
         if (mCity != null) {
+        //         deliverResult возвращает данные в LoaderCallbacks
             deliverResult(mCity);
         } else {
+        //        forceLoad инициирует вызов метода onForceLoad
+        //  По сути, этот метод служит только для удобства и
+        // логического разделения между методами жизненного цикла и методами для
+        //  загрузки данных
             forceLoad();
+
         }
     }
 
     @Override
+    //            В методе onForceLoad вы должны загрузить данные асинхронно
+    //            и вернуть результат с помощью метода deliverResult
     protected void onForceLoad() {
         super.onForceLoad();
         mCall.enqueue(new Callback<City>() {
@@ -47,6 +57,7 @@ public class RetrofitWeatherLoader extends Loader<City> {
             }
 
             @Override
+            
             public void onFailure(Call<City> call, Throwable t) {
                 deliverResult(null);
             }
@@ -54,6 +65,7 @@ public class RetrofitWeatherLoader extends Loader<City> {
     }
 
     @Override
+    //    мы должны остановить загрузку данных. Благо, с Retrofit это очень просто
     protected void onStopLoading() {
         mCall.cancel();
         super.onStopLoading();
